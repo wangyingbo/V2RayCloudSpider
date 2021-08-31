@@ -131,3 +131,7 @@ dmypy.json
 
 /V2RaycSpider1125/tests/
 /V2RaycSpider1125/README.md
+/V2RaycSpider1225/tests
+/V2RaycSpider1225/Database/logs
+/V2RaycSpider1225/Database/temp_cache
+/V2RaycSpider1225/Database/staff_hosts

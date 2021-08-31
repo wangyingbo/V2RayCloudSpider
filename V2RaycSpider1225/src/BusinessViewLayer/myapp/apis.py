@@ -1,15 +1,19 @@
 __all__ = [
-    'apis_version_manager',
-    'apis_get_subs_num',
     'apis_admin_get_subs',
-    'apis_capture_subscribe'
+    'apis_admin_get_subs_v2',
+    'apis_admin_get_subs_v2_debug',
+    "apis_admin_get_entropy",
+
+    'apis_get_subs_num',
+    'apis_version_manager',
+    'apis_capture_subscribe',
 ]
 
 import csv
 
 from src.BusinessCentralLayer.middleware.redis_io import RedisClient
-from src.BusinessCentralLayer.middleware.subscribe_io import pop_subs_to_admin
-from src.BusinessCentralLayer.setting import CRAWLER_SEQUENCE, NGINX_SUBSCRIBE, SERVER_PATH_DEPOT_VCS
+from src.BusinessCentralLayer.middleware.subscribe_io import pop_subs_to_admin, select_subs_to_admin
+from src.BusinessCentralLayer.setting import CRAWLER_SEQUENCE, NGINX_SUBSCRIBE, SERVER_PATH_DEPOT_VCS, REDIS_SECRET_KEY
 
 
 def apis_capture_subscribe(style: dict) -> dict:
@@ -110,13 +114,25 @@ def apis_refresh_broadcast(show_path: str = NGINX_SUBSCRIBE, hyper_params: dict 
 def apis_admin_get_subs(command_: str):
     if not (command_ and isinstance(command_, str)) or command_ not in CRAWLER_SEQUENCE:
         return {"msg": "failed", "info": "参数类型错误"}
-    else:
-        return pop_subs_to_admin(command_)
+    return pop_subs_to_admin(command_)
 
 
 def apis_get_subs_num() -> dict:
     return RedisClient().subs_info()
 
 
+def apis_admin_get_entropy() -> list:
+    return RedisClient().get_driver().get(REDIS_SECRET_KEY.format("__entropy__")).split("$")
+
+
+def apis_admin_get_subs_v2(entropy_name: str = None) -> dict:
+    return select_subs_to_admin(select_netloc=entropy_name)
+
+
+def apis_admin_get_subs_v2_debug(entropy_name: str = None, _debug=True) -> dict:
+    """测试接口|获取链接后，该链接不会被主动移除"""
+    return select_subs_to_admin(select_netloc=entropy_name, _debug=_debug)
+
+
 if __name__ == '__main__':
-    print(apis_get_subs_num())
+    print(apis_admin_get_subs_v2_debug(entropy_name="r"))
